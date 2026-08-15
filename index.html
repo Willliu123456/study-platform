@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>学升·智能刷题平台 — 考研·考公·期末刷题</title>
+  <meta name="description" content="专为大学生、研究生、考公考研人群打造的智能刷题学习平台：海量题库、专项训练、模拟考试、错题本、学习统计与 VIP 会员。" />
+  <meta name="theme-color" content="#3043AA" />
+  <link rel="icon" type="image/png" href="./assets/logo.png" />
+  <link rel="apple-touch-icon" href="./assets/icon-192.png" />
+  <link rel="manifest" href="./manifest.json" />
+  <link rel="stylesheet" href="./css/style.css" />
+</head>
+<body>
+  <!-- ========== 启动闪屏（每次打开应用都显示，2 秒后淡出） ========== -->
+  <div id="splash">
+    <div id="splash-glow"></div>
+    <div id="splash-diamond">
+      <svg viewBox="0 0 24 24" fill="none" width="100%" height="100%">
+        <defs>
+          <linearGradient id="sp-gold" x1="0" y1="0" x2="1" y2="1">
+            <stop offset="0%" stop-color="#fde68a"/>
+            <stop offset="50%" stop-color="#fbbf24"/>
+            <stop offset="100%" stop-color="#d97706"/>
+          </linearGradient>
+        </defs>
+        <path d="M12 2 9.5 9 2 9.5l5.6 4.8L6 21l6-3.4L18 21l-1.6-6.7L22 9.5 14.5 9 12 2Z" fill="url(#sp-gold)" stroke="#fbbf24" stroke-width="0.5" stroke-linejoin="round"/>
+        <path d="M12 2 9.5 9 12 12 14.5 9 12 2Z" fill="#fef3c7" opacity="0.6"/>
+      </svg>
+    </div>
+    <h1 id="splash-title">学升智能刷题</h1>
+    <div id="splash-line"></div>
+    <p id="splash-sub">AI 智能刷题学习平台</p>
+    <div id="splash-dots"><span></span><span></span><span></span></div>
+  </div>
+  <div id="app"></div>
+  <div id="toast-wrap"></div>
+
+  <!-- 图标库（轻量 inline SVG，无外部依赖） -->
+  <script>
+    window.ICONS = {
+      home: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 10.5 12 3l9 7.5"/><path d="M5 9.5V21h5v-6h4v6h5V9.5"/></svg>',
+      practice: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 6h16M4 12h16M4 18h10"/><circle cx="18" cy="18" r="2.4"/><path d="M17 18.8 18.2 20l2.3-2.6"/></svg>',
+      exam: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 3H5a1 1 0 0 0-1 1v16a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1V4a1 1 0 0 0-1-1h-4"/><rect x="9" y="3" width="6" height="4" rx="1"/><path d="M8.5 13h7M8.5 17h4.5"/></svg>',
+      wrong: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3 5 6v6c0 4.4 3 8.4 7 9 4-.6 7-4.6 7-9V6l-7-3Z"/><path d="M9 12l2 2 4-4"/></svg>',
+      vip: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2 9.5 9 2 9.5l5.6 4.8L6 21l6-3.4L18 21l-1.6-6.7L22 9.5 14.5 9 12 2Z"/></svg>',
+      chart: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/></svg>',
+      user: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 21c1.5-4 4.5-6 8-6s6.5 2 8 6"/></svg>',
+      clock: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>',
+      flame: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22c4 0 7-2.7 7-7 0-3.5-2.2-5.8-3.8-7.5-.8-.8-1.5.3-1.2 1.3.3 1-1 1.5-1.5.8C11 8 9.5 6 9.5 3.5c0-.8-1.1-1.1-1.5-.4C6.8 5.4 5 8.5 5 15c0 4.3 3 7 7 7Z"/></svg>',
+      arrowRight: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg>',
+      arrowLeft: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5M11 6l-6 6 6 6"/></svg>',
+      chevronDown: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg>',
+      check: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12.5 10 18.5 20 6.5"/></svg>',
+      close: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M6 6l12 12M18 6 6 18"/></svg>',
+      refresh: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 12a8 8 0 1 1-2.3-5.6"/><path d="M20 3v4h-4"/></svg>',
+      book: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 5.5A2.5 2.5 0 0 1 6.5 3H20v15H6.5A2.5 2.5 0 0 0 4 20.5V5.5Z"/><path d="M4 20.5A2.5 2.5 0 0 1 6.5 18H20"/></svg>',
+      target: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="5"/><circle cx="12" cy="12" r="1.2" fill="currentColor"/></svg>',
+      shield: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2 4 5v6c0 5 3.4 9.4 8 11 4.6-1.6 8-6 8-11V5l-8-3Z"/><path d="m9 12 2 2 4-4"/></svg>',
+      card: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="5" width="20" height="14" rx="2"/><path d="M2 10h20"/></svg>',
+      medal: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="14" r="6"/><path d="M9 9 10 4h4l1 5"/><path d="M10 4l2 3 2-3"/></svg>',
+      bell: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8a6 6 0 1 0-12 0c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.7 21a2 2 0 0 1-3.4 0"/></svg>',
+      server: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="7" rx="2"/><rect x="3" y="13" width="18" height="7" rx="2"/><path d="M7 7.5h.01M7 16.5h.01"/></svg>'
+    };
+  </script>
+
+  <script src="./js/data.js"></script>
+  <script src="./js/data2.js"></script>
+  <script src="./js/data3.js"></script>
+  <script src="./js/data4.js"></script>
+  <script src="./js/data5.js"></script>
+  <script src="./js/data6.js"></script>
+  <script src="./js/data7.js"></script>
+  <script src="./js/data8.js"></script>
+  <script src="./js/data9.js"></script>
+  <script src="./js/store.js"></script>
+  <!-- 个人题库导入解析库（本地依赖，无外部网络） -->
+  <script src="./js/lib/fflate.min.js"></script>
+  <script src="./js/lib/pdf.min.js"></script>
+  <script src="./js/importer.js"></script>
+  <script src="./js/api.js"></script>
+  <script src="./js/app.js"></script>
+
+  <!-- 安装应用引导条 -->
+  <div id="install-bar" hidden>
+    <span>把「学升」装到桌面，像 App 一样使用</span>
+    <button id="install-btn">安装应用</button>
+    <button id="install-close" aria-label="关闭">✕</button>
+  </div>
+  <style>
+    #install-bar {
+      position: fixed;
+      left: 50%;
+      bottom: 16px;
+      transform: translateX(-50%);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      background: #fff;
+      color: #1f2937;
+      padding: 10px 14px 10px 16px;
+      border-radius: 12px;
+      box-shadow: 0 8px 28px rgba(31, 41, 55, .22);
+      font-size: 13px;
+      z-index: 9999;
+    }
+    #install-bar[hidden] { display: none; }
+    #install-btn {
+      background: #3043AA;
+      color: #fff;
+      border: none;
+      border-radius: 8px;
+      padding: 7px 14px;
+      font-size: 13px;
+      cursor: pointer;
+      white-space: nowrap;
+    }
+    #install-btn:hover { background: #16309A; }
+    #install-close {
+      background: none;
+      border: none;
+      color: #9ca3af;
+      font-size: 14px;
+      cursor: pointer;
+      padding: 4px;
+    }
+    #install-close:hover { color: #4b5563; }
+  </style>
+  <script>
+    (function () {
+      var promptEvt = null;
+      var bar = document.getElementById('install-bar');
+      var btn = document.getElementById('install-btn');
+      var close = document.getElementById('install-close');
+
+      window.addEventListener('beforeinstallprompt', function (e) {
+        e.preventDefault();
+        promptEvt = e;
+        bar.hidden = false;
+      });
+      if (close) close.addEventListener('click', function () { bar.hidden = true; });
+      if (btn) btn.addEventListener('click', function () {
+        if (!promptEvt) return;
+        promptEvt.prompt();
+        promptEvt.userChoice.then(function () { bar.hidden = true; });
+      });
+      window.addEventListener('appinstalled', function () { bar.hidden = true; });
+
+      if ('serviceWorker' in navigator) {
+        navigator.serviceWorker.register('./sw.js').catch(function () {});
+      }
+    })();
+  </script>
+</body>
+</html>

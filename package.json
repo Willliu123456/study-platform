@@ -1,0 +1,18 @@
+{
+  "name": "xuesheng-study",
+  "productName": "学升·智能刷题平台",
+  "version": "1.0.0",
+  "description": "学升·智能刷题平台：考研·考公·期末刷题学习平台（桌面应用版）",
+  "main": "electron-main.js",
+  "private": true,
+  "scripts": {
+    "start": "electron .",
+    "pack": "electron-packager . \"学升\" --platform=win32 --arch=x64 --out=release --overwrite --prune=true --icon=assets/app.ico --ignore=\"^/release($|/)\" --ignore=\"^/server\\.log\" --ignore=\"^/_test_start\\.js\" --ignore=\"^/_probe\\.js\"",
+    "make-ico": "node scripts/make-ico.js"
+  },
+  "devDependencies": {
+    "electron": "^36.9.5",
+    "electron-packager": "^17.1.2",
+    "png-to-ico": "^3.0.2"
+  }
+}

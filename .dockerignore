@@ -1,0 +1,16 @@
+node_modules
+release
+android-app/node_modules
+android-app/android/app/build
+android-app/www
+.git
+*.log
+_*.log
+_pack_*.log
+data
+deploy
+scripts
+*.md
+.pentest_*
+test
+__tests__

@@ -1,0 +1,1044 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="referrer" content="no-referrer">
+<title>学升 · 管理控制台</title>
+<style>
+  :root {
+    --primary:#4F46E5; --primary-light:#EEF2FF; --danger:#DC2626; --success:#16A34A;
+    --warning:#D97706; --bg:#F1F5F9; --card:#fff; --border:#E2E8F0;
+    --text-1:#0F172A; --text-2:#475569; --text-3:#94A3B8; --radius:14px;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: -apple-system, BlinkMacSystemFont, "Microsoft YaHei", sans-serif; background: var(--bg); color: var(--text-1); min-height: 100vh; }
+  .topbar { background: linear-gradient(135deg,#4F46E5,#7C3AED); color: #fff; padding: 16px 24px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 8px; }
+  .topbar h1 { font-size: 18px; font-weight: 700; }
+  .topbar .sub { font-size: 12px; opacity: .85; margin-top: 2px; }
+  .topbar .right { display: flex; align-items: center; gap: 10px; }
+  .wrap { max-width: 1080px; margin: 0 auto; padding: 18px 16px 40px; }
+  .stats { display: grid; grid-template-columns: repeat(7, 1fr); gap: 10px; margin-bottom: 16px; }
+  .stat { background: var(--card); border-radius: var(--radius); padding: 13px 14px; box-shadow: 0 1px 3px rgba(0,0,0,.06); cursor: pointer; transition: transform .12s ease, box-shadow .12s ease; user-select: none; }
+  .stat:hover { transform: translateY(-2px); box-shadow: 0 6px 16px rgba(0,0,0,.10); }
+  .stat b { display: block; font-size: 21px; margin-top: 3px; }
+  .stat span { font-size: 12px; color: var(--text-3); }
+  .stat .hint { font-size: 11px; color: var(--primary); margin-top: 2px; opacity: .85; }
+  .stat.pending b { color: var(--warning); }
+  .stat.revenue b { color: var(--success); }
+  .stat.vip b { color: #7C3AED; }
+  .stat.active b { color: var(--primary); }
+  .card { background: var(--card); border-radius: var(--radius); box-shadow: 0 1px 3px rgba(0,0,0,.06); overflow: hidden; }
+  .card-head { padding: 14px 18px 0; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 8px; }
+  .card-head h2 { font-size: 15px; }
+  .tabs { display: flex; gap: 8px; padding: 14px 16px 0; flex-wrap: wrap; }
+  .tab { border: none; background: var(--bg); padding: 8px 18px; border-radius: 999px; font-size: 13px; cursor: pointer; color: var(--text-2); font-weight: 600; }
+  .tab.active { background: var(--primary); color: #fff; }
+  table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  th, td { padding: 10px 14px; text-align: left; border-bottom: 1px solid var(--border); vertical-align: middle; }
+  th { color: var(--text-3); font-size: 12px; font-weight: 600; background: #F8FAFC; white-space: nowrap; }
+  tr:hover td { background: #F8FAFC; }
+  .badge { display: inline-block; padding: 2px 10px; border-radius: 999px; font-size: 12px; font-weight: 600; }
+  .badge.pending { background: #FEF3C7; color: #92400E; }
+  .badge.confirmed { background: #DCFCE7; color: #166534; }
+  .badge.rejected { background: #FEE2E2; color: #991B1B; }
+  .badge.free { background: #F1F5F9; color: #64748B; }
+  .badge.vip1 { background: #FEF3C7; color: #92400E; }
+  .badge.vip2 { background: #E2E8F0; color: #475569; }
+  .badge.vip3 { background: linear-gradient(135deg,#F59E0B,#F97316); color: #fff; }
+  .badge.expired { background: #FEE2E2; color: #991B1B; }
+  .badge.role-admin { background: #E0E7FF; color: #4338CA; }
+  .btn { border: none; border-radius: 9px; padding: 7px 14px; font-size: 13px; cursor: pointer; font-weight: 600; }
+  .btn-ok { background: var(--success); color: #fff; }
+  .btn-ok:hover { filter: brightness(1.08); }
+  .btn-no { background: #fff; color: var(--danger); border: 1.5px solid var(--danger); margin-left: 6px; }
+  .btn-no:hover { background: #FEF2F2; }
+  .btn-ghost { background: #fff; color: var(--primary); border: 1.5px solid var(--primary); }
+  .empty { text-align: center; padding: 48px 0; color: var(--text-3); }
+  .empty .big { font-size: 40px; margin-bottom: 8px; }
+  .note { font-size: 12px; color: var(--text-3); line-height: 1.7; }
+  .note code { background: var(--bg); padding: 1px 6px; border-radius: 5px; }
+  .search { border: 1.5px solid var(--border); border-radius: 10px; padding: 8px 12px; font-size: 13px; outline: none; width: 220px; }
+  .search:focus { border-color: var(--primary); box-shadow: 0 0 0 3px var(--primary-light); }
+  .login-box { max-width: 380px; margin: 12vh auto 0; background: var(--card); border-radius: var(--radius); padding: 32px; box-shadow: 0 8px 30px rgba(0,0,0,.08); }
+  .login-box h2 { font-size: 20px; margin-bottom: 6px; }
+  .login-box p { font-size: 13px; color: var(--text-2); margin-bottom: 18px; }
+  .login-box input { width: 100%; border: 1.5px solid var(--border); border-radius: 10px; padding: 11px 12px; font-size: 14px; outline: none; margin-bottom: 12px; }
+  .login-box input:focus { border-color: var(--primary); box-shadow: 0 0 0 3px var(--primary-light); }
+  .login-box .btn { width: 100%; padding: 12px; font-size: 15px; background: var(--primary); color: #fff; }
+  .toast { position: fixed; top: 20px; left: 50%; transform: translateX(-50%); background: #0F172A; color: #fff; padding: 10px 20px; border-radius: 999px; font-size: 13px; z-index: 99; opacity: 0; transition: .25s; pointer-events: none; }
+  .toast.show { opacity: 1; }
+  .foot { text-align: center; color: var(--text-3); font-size: 12px; margin-top: 20px; }
+  .logout { background: rgba(255,255,255,.18); color: #fff; border: none; padding: 7px 14px; border-radius: 9px; font-size: 13px; cursor: pointer; }
+  .reload { border: none; background: var(--primary); color: #fff; padding: 8px 18px; border-radius: 999px; font-size: 13px; cursor: pointer; font-weight: 600; }
+  .reload.ghost { background: #fff; color: var(--primary); border: 1.5px solid var(--primary); }
+  .avatar { width: 30px; height: 30px; border-radius: 50%; background: var(--primary-light); color: var(--primary); display: inline-flex; align-items: center; justify-content: center; font-weight: 700; font-size: 13px; margin-right: 8px; vertical-align: middle; }
+  .vip-expire { font-size: 12px; color: var(--text-3); }
+  .bar { height: 6px; border-radius: 99px; background: var(--bg); overflow: hidden; width: 100%; min-width: 70px; }
+  .bar > i { display: block; height: 100%; background: linear-gradient(90deg,#4F46E5,#7C3AED); }
+  .form-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 10px; }
+  .form-grid input, .form-grid select { border: 1.5px solid var(--border); border-radius: 10px; padding: 10px 12px; font-size: 13px; outline: none; }
+  .form-grid input:focus, .form-grid select:focus { border-color: var(--primary); box-shadow: 0 0 0 3px var(--primary-light); }
+  .toolbar { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+  .log-action { font-family: ui-monospace, monospace; font-size: 12px; background: var(--bg); padding: 2px 8px; border-radius: 6px; }
+  /* ---------- 用户详情弹窗 ---------- */
+  .modal-mask { position: fixed; inset: 0; background: rgba(15,23,42,.55); backdrop-filter: blur(4px); display: flex; align-items: center; justify-content: center; z-index: 60; padding: 18px; }
+  .modal-box { background: var(--card); border-radius: 18px; width: 900px; max-width: 100%; max-height: 92vh; display: flex; flex-direction: column; box-shadow: 0 24px 60px rgba(0,0,0,.28); animation: mp .18s ease; }
+  @keyframes mp { from { transform: translateY(14px) scale(.98); opacity: 0; } to { transform: none; opacity: 1; } }
+  .modal-head { display: flex; align-items: center; gap: 14px; padding: 18px 22px; background: linear-gradient(135deg,#4F46E5,#7C3AED); color: #fff; border-radius: 18px 18px 0 0; }
+  .detail-avatar { width: 52px; height: 52px; border-radius: 50%; background: rgba(255,255,255,.22); display: flex; align-items: center; justify-content: center; font-size: 22px; font-weight: 800; flex-shrink: 0; }
+  .modal-close { margin-left: auto; width: 34px; height: 34px; border: none; border-radius: 50%; background: rgba(255,255,255,.18); color: #fff; font-size: 17px; cursor: pointer; flex-shrink: 0; }
+  .modal-close:hover { background: rgba(255,255,255,.32); }
+  .modal-body { overflow-y: auto; padding: 20px 22px 26px; }
+  .dstat { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; }
+  .dstat-item { background: #F8FAFC; border: 1px solid var(--border); border-radius: 12px; padding: 10px 12px; }
+  .dstat-item span { font-size: 12px; color: var(--text-3); display: block; }
+  .dstat-item b { font-size: 19px; display: block; margin-top: 2px; }
+  .detail-sec { margin-top: 18px; }
+  .detail-sec h3 { font-size: 14px; margin-bottom: 10px; display: flex; align-items: center; gap: 8px; }
+  .trend { display: flex; align-items: flex-end; gap: 6px; height: 128px; padding: 6px 4px 0; border-bottom: 1px solid var(--border); }
+  .trend-bar { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: flex-end; height: 100%; gap: 3px; }
+  .trend-bar i { width: 100%; max-width: 34px; background: linear-gradient(180deg,#4F46E5,#7C3AED); border-radius: 5px 5px 2px 2px; min-height: 4px; }
+  .trend-bar span { font-size: 10px; color: var(--text-2); font-weight: 700; }
+  .trend-bar em { font-size: 10px; color: var(--text-3); font-style: normal; }
+  .bp-row { display: flex; align-items: center; gap: 12px; padding: 6px 0; }
+  .bp-name { width: 160px; font-size: 13px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .bp-bar { flex: 1; height: 8px; border-radius: 99px; background: var(--bg); overflow: hidden; }
+  .bp-bar i { display: block; height: 100%; border-radius: 99px; background: linear-gradient(90deg,#10B981,#22C55E); }
+  .bp-num { width: 96px; text-align: right; font-size: 12px; color: var(--text-2); }
+  .pb-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 8px; }
+  .pb-row { display: flex; align-items: center; gap: 10px; padding: 8px 12px; background: #F8FAFC; border: 1px solid var(--border); border-radius: 10px; }
+  .pb-name { flex: 1; font-size: 13px; font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .pb-count { font-size: 12px; color: var(--text-2); white-space: nowrap; }
+  .detail-note { font-size: 12px; color: var(--text-3); line-height: 1.8; }
+  @media (max-width: 900px) { .stats { grid-template-columns: repeat(3, 1fr); } }
+  @media (max-width: 720px) { .dstat { grid-template-columns: repeat(2, 1fr); } }
+</style>
+</head>
+<body>
+<div id="app"></div>
+<div class="toast" id="toast"></div>
+<!-- ============================================================
+  ⚠️ 已移除离线模式 fetch 拦截器（原第 122-351 行）
+  原因：该拦截器会阻止所有 /api/admin/* 请求到达后端服务器，
+       导致登录验证失败和数据不同步。
+  修复方案：移除拦截器，让前端直接与后端 API 通信。
+  后端服务已在端口 8790 正常运行，无需降级到离线模式。
+  ============================================================ -->
+<script>
+(function () {
+  const SKEY = 'xs_admin_session';
+  const app = document.getElementById('app');
+  const toastEl = document.getElementById('toast');
+  let token = '';
+  let state = { tab: 'overview', dash: null, users: [], orders: [], logs: [], redeem: [], tickets: [], q: '', vipFilter: 'all', orderFilter: 'all', ticketFilter: 'all', paused: false, exporting: false };
+  /* 安全修复：管理端会话改用 sessionStorage（关闭标签页即失效），降低 token 被持久窃取的风险 */
+  try { token = sessionStorage.getItem(SKEY) || localStorage.getItem(SKEY) || ''; localStorage.removeItem(SKEY); } catch (e) {}
+
+  function toast(msg) {
+    toastEl.textContent = msg;
+    toastEl.classList.add('show');
+    clearTimeout(toast._t);
+    toast._t = setTimeout(() => toastEl.classList.remove('show'), 2600);
+  }
+  function money(n) { return '¥' + Number(n || 0).toFixed(2); }
+  function fmtTime(t) {
+    if (!t) return '-';
+    const d = new Date(t);
+    const p = n => String(n).padStart(2, '0');
+    return d.getFullYear() + '-' + p(d.getMonth() + 1) + '-' + p(d.getDate()) + ' ' + p(d.getHours()) + ':' + p(d.getMinutes());
+  }
+  function fmtDate(t) {
+    if (!t) return '-';
+    const d = new Date(t);
+    const p = n => String(n).padStart(2, '0');
+    return d.getFullYear() + '-' + p(d.getMonth() + 1) + '-' + p(d.getDate());
+  }
+  /* 相对时间："刚刚 / N 分钟前 / N 小时前"（在线监控用） */
+  function fmtAgo(t) {
+    if (!t) return '-';
+    const s = Math.max(0, Math.floor((Date.now() - t) / 1000));
+    if (s < 60) return '刚刚';
+    if (s < 3600) return Math.floor(s / 60) + ' 分钟前';
+    if (s < 86400) return Math.floor(s / 3600) + ' 小时前';
+    return Math.floor(s / 86400) + ' 天前';
+  }
+  function planName(id) {
+    return { vip1: '黄金VIP', vip2: '铂金VIP', vip3: '至尊VIP' }[id] || id || '-';
+  }
+  function vipBadge(level, expireAt) {
+    if (level === 'free') return '<span class="badge free">普通</span>';
+    const active = (expireAt || 0) > Date.now();
+    if (!active) return '<span class="badge expired">已过期</span>';
+    return '<span class="badge ' + level + '">' + planName(level) + '</span>';
+  }
+  function esc(s) {
+    return String(s == null ? '' : s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+  }
+  function logoutLocal(msg) {
+    token = ''; sessionStorage.removeItem(SKEY); localStorage.removeItem(SKEY);
+    toast(msg || '登录已失效，请重新登录');
+    renderLogin();
+  }
+  async function api(method, path, body) {
+    const r = await fetch(path, {
+      method,
+      headers: { 'Content-Type': 'application/json', 'x-admin-token': token },
+      body: body ? JSON.stringify(body) : undefined
+    });
+    let j = {};
+    try { j = await r.json(); } catch (e) { j = {}; }
+    if (!r.ok || !j.ok) {
+      const err = new Error(j.msg || '请求失败(' + r.status + ')');
+      err.status = r.status;
+      throw err;
+    }
+    return j.data;
+  }
+
+  function renderLogin() {
+    app.innerHTML = `
+      <div class="login-box">
+        <h2>🔐 学升管理控制台</h2>
+        <p>仅限管理员本人使用，口令验证失败 5 次将锁定 15 分钟</p>
+        <input type="password" id="token-input" placeholder="管理员口令" autocomplete="off">
+        <button class="btn" id="login-btn">进入后台</button>
+        <div style="font-size:12px;color:var(--text-3);margin-top:12px;line-height:1.7">
+          首次使用的初始口令：见服务器 <code>data/admin.config.json</code><br>
+          或由环境变量 <code>XS_ADMIN_PASSWORD</code> 预设。<br>
+          登录后请立即在「安全」中修改。
+        </div>
+      </div>`;
+    document.getElementById('login-btn').addEventListener('click', doLogin);
+    document.getElementById('token-input').addEventListener('keydown', e => { if (e.key === 'Enter') doLogin(); });
+    document.getElementById('token-input').focus();
+  }
+  async function doLogin() {
+    const pw = document.getElementById('token-input').value.trim();
+    if (!pw) return toast('请输入口令');
+    const btn = document.getElementById('login-btn');
+    btn.disabled = true; btn.textContent = '验证中…';
+    try {
+      const r = await fetch('/api/admin/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ password: pw })
+      });
+      const j = await r.json().catch(() => ({}));
+      if (!r.ok || !j.ok) {
+        toast(j.msg || '登录失败');
+        btn.disabled = false; btn.textContent = '进入后台';
+        return;
+      }
+      token = j.data.token;
+      try { sessionStorage.setItem(SKEY, token); } catch (e) {}
+      load();
+    } catch (e) {
+      toast('网络错误：' + e.message);
+      btn.disabled = false; btn.textContent = '进入后台';
+    }
+  }
+
+  async function load() {
+    try {
+      const [dash, users, orders, logs, redeem, tickets] = await Promise.all([
+        api('GET', '/api/admin/dashboard'),
+        api('GET', '/api/admin/users'),
+        api('GET', '/api/admin/orders'),
+        api('GET', '/api/admin/logs?limit=100'),
+        api('GET', '/api/admin/redeem/list?limit=200'),
+        api('GET', '/api/admin/tickets')
+      ]);
+      state.dash = dash || {};
+      state.users = users || [];
+      state.orders = orders || [];
+      state.logs = logs || [];
+      state.redeem = redeem || [];
+      state.tickets = tickets || [];
+      render();
+    } catch (e) {
+      if (e.status === 401) logoutLocal('登录已过期，请重新登录');
+      else { toast('加载失败：' + e.message); render(); }
+    }
+  }
+
+  function render() {
+    const d = state.dash || {};
+    const users = state.users;
+    const orders = state.orders;
+    const pending = orders.filter(o => o.status === 'pending');
+    const confirmed = orders.filter(o => o.status === 'confirmed');
+    const q = state.q.trim().toLowerCase();
+    let showUsers = users;
+    if (state.vipFilter === 'vip') showUsers = showUsers.filter(u => u.vip.level !== 'free' && u.vip.expireAt > Date.now());
+    if (state.vipFilter === 'active') showUsers = showUsers.filter(u => u.record.todayTotal > 0);
+    if (state.vipFilter === 'online') showUsers = showUsers.filter(u => u.lastSeen && (Date.now() - u.lastSeen) < 5 * 60 * 1000);
+    if (q) showUsers = showUsers.filter(u => (u.username || '').toLowerCase().includes(q) || (u.nickname || '').toLowerCase().includes(q));
+    const showOrders = state.orderFilter === 'pending' ? pending : state.orderFilter === 'confirmed' ? confirmed : orders;
+
+    app.innerHTML = `
+      <div class="topbar">
+        <div>
+          <h1>🛡 学升 · 管理控制台</h1>
+          <div class="sub">实时用户/支付监控 · 操作全程审计 · 会话 12 小时自动过期</div>
+        </div>
+        <div class="right">
+          <span style="font-size:12px;opacity:.9">${new Date().toLocaleString()}</span>
+          <button class="logout" id="logout-btn">退出登录</button>
+        </div>
+      </div>
+      <div class="wrap">
+        <div class="stats">
+          <div class="stat online" style="border-top:3px solid #22c55e" data-goto="users:online" title="点击查看当前在线用户"><span>🟢 实时在线</span><b>${d.onlineUsers || 0}</b><div class="hint">5 分钟内活跃 · 查看 ›</div></div>
+          <div class="stat" data-goto="users:all" title="点击查看全部用户明细"><span>总用户</span><b>${d.users || 0}</b><div class="hint">今日新增 ${d.todayNew || 0} · 查看 ›</div></div>
+          <div class="stat vip" data-goto="users:vip" title="点击查看 VIP 用户"><span>VIP 用户</span><b>${d.vipUsers || 0}</b><div class="hint">当前有效会员 · 查看 ›</div></div>
+          <div class="stat active" data-goto="users:active" title="点击查看今日活跃用户"><span>今日活跃</span><b>${d.todayActive || 0}</b><div class="hint">今日刷题 ${d.todayQuestions || 0} · 查看 ›</div></div>
+          <div class="stat" data-goto="users:all" title="点击查看刷题排行"><span>累计刷题</span><b>${(d.totalQuestions || 0).toLocaleString()}</b><div class="hint">全平台总答题 · 查看 ›</div></div>
+          <div class="stat pending" data-goto="orders:pending" title="点击核对订单"><span>待核对订单</span><b>${d.pendingOrders || 0}</b><div class="hint">今日订单 ${d.todayOrders || 0} · 去核对 ›</div></div>
+          <div class="stat" data-goto="orders:confirmed" title="点击查看已开通记录"><span>已开通会员</span><b>${d.confirmedOrders || 0}</b><div class="hint">总订单 ${d.totalOrders || 0} · 查看 ›</div></div>
+          <div class="stat revenue" data-goto="orders:confirmed" title="点击查看收入明细"><span>已确认收入</span><b>${money(d.revenue)}</b><div class="hint">人工核验到账 · 查看 ›</div></div>
+          <div class="stat" data-goto="tickets:todo" title="点击查看待处理工单"><span>待处理工单</span><b style="color:${(d.pendingTickets || 0) > 0 ? 'var(--warning)' : 'var(--text-1)'}">${d.pendingTickets || 0}</b><div class="hint">总 ${d.totalTickets || 0} · 去处理 ›</div></div>
+        </div>
+        <div class="card">
+          <div class="tabs">
+            <button class="tab ${state.tab === 'overview' ? 'active' : ''}" data-tab="overview">概览</button>
+            <button class="tab ${state.tab === 'users' ? 'active' : ''}" data-tab="users">用户 (${users.length})</button>
+            <button class="tab ${state.tab === 'orders' ? 'active' : ''}" data-tab="orders">订单 (${orders.length})</button>
+            <button class="tab ${state.tab === 'logs' ? 'active' : ''}" data-tab="logs">审计日志</button>
+            <button class="tab ${state.tab === 'redeem' ? 'active' : ''}" data-tab="redeem">兑换码</button>
+            <button class="tab ${state.tab === 'tickets' ? 'active' : ''}" data-tab="tickets">客服工单 (${state.tickets.filter(t => t.status !== 'closed').length})</button>
+            <button class="tab ${state.tab === 'security' ? 'active' : ''}" data-tab="security">安全</button>
+          </div>
+          ${state.tab === 'overview' ? renderOverview(users) : ''}
+          ${state.tab === 'users' ? renderUsers(showUsers) : ''}
+          ${state.tab === 'orders' ? renderOrders(showOrders) : ''}
+          ${state.tab === 'logs' ? renderLogs() : ''}
+          ${state.tab === 'redeem' ? renderRedeem() : ''}
+          ${state.tab === 'tickets' ? renderTickets() : ''}
+          ${state.tab === 'security' ? renderSecurity() : ''}
+        </div>
+        <div style="display:flex;justify-content:center;gap:10px;margin-top:16px">
+          <button class="reload" id="refresh-btn">⟳ 立即刷新</button>
+          <button class="reload ghost" id="pause-btn">${state.paused ? '▶ 恢复自动刷新' : '⏸ 暂停自动刷新'}</button>
+        </div>
+        <p class="foot">数据来自学升后端 SQLite，每 15 秒自动刷新 · 会话 12 小时过期 · 关键操作写入审计日志</p>
+      </div>`;
+
+    document.getElementById('logout-btn').addEventListener('click', async () => {
+      try { await api('POST', '/api/admin/logout'); } catch (e) {}
+      logoutLocal('已退出登录');
+    });
+    document.getElementById('refresh-btn').addEventListener('click', load);
+    document.getElementById('pause-btn').addEventListener('click', () => { state.paused = !state.paused; render(); });
+    app.querySelectorAll('.tab').forEach(t => t.addEventListener('click', () => { state.tab = t.dataset.tab; render(); }));
+    app.querySelectorAll('.stat[data-goto]').forEach(s => s.addEventListener('click', () => {
+      const parts = s.dataset.goto.split(':');
+      state.tab = parts[0];
+      if (parts[0] === 'orders') state.orderFilter = parts[1] || 'all';
+      if (parts[0] === 'users' && parts[1]) state.vipFilter = parts[1];
+      if (parts[0] === 'tickets' && parts[1]) state.ticketFilter = parts[1];
+      render();
+    }));
+    bindOverview();
+    bindUsers();
+    bindOrders();
+    bindRedeem();
+    bindTickets();
+    bindSecurity();
+  }
+
+  function renderOverview(users) {
+    const vipUsers = users.filter(u => u.vip.level !== 'free' && u.vip.expireAt > Date.now());
+    const top = [...users].sort((a, b) => (b.record.total || 0) - (a.record.total || 0)).slice(0, 8);
+    const todayTop = [...users].filter(u => u.record.todayTotal > 0).sort((a, b) => b.record.todayTotal - a.record.todayTotal).slice(0, 8);
+    const ol = state.dash && state.dash.onlineList ? state.dash.onlineList : [];
+    return `
+      <div style="padding:16px 18px">
+        <div class="card-head" style="padding:0 0 14px">
+          <h2>🟢 实时在线（${state.dash ? state.dash.onlineUsers : 0} 人 · 5 分钟内活跃）</h2>
+          <span class="hint" style="font-size:12px;color:var(--text-3)">每 15 秒自动刷新 · 心跳间隔约 15 秒</span>
+        </div>
+        ${ol.length ? `<div style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:6px">
+          ${ol.map(u => `<span class="badge online" style="background:#ecfdf5;color:#059669;border:1px solid #a7f3d0">🟢 ${esc(u.nickname || u.username)}${u.vip && u.vip.level !== 'free' ? ' · ' + planName(u.vip.level) : ''}<span style="color:#94a3b8;font-size:11px;margin-left:4px">${fmtAgo(u.lastSeen)}</span></span>`).join('')}
+        </div>` : '<div class="note" style="margin-bottom:8px">当前没有在线用户</div>'}
+        <div class="card-head" style="padding:0 0 14px">
+          <h2>快捷工具</h2>
+          <div class="toolbar">
+            <button class="btn btn-ok" id="grant-btn">🎁 手动开通会员</button>
+            <button class="btn btn-ghost" id="export-btn">⬇ 导出数据 CSV</button>
+          </div>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px">
+          <div>
+            <h2 style="font-size:14px;margin-bottom:10px">🔥 今日刷题 Top 8</h2>
+            ${todayTop.length ? todayTop.map(u => `
+              <div style="display:flex;align-items:center;gap:10px;padding:7px 0;border-bottom:1px dashed var(--border)">
+                <span class="avatar">${esc((u.nickname || u.username).slice(0, 1))}</span>
+                <div style="flex:1;min-width:0">
+                  <div style="font-size:13px;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(u.nickname || u.username)}</div>
+                  <div class="bar"><i style="width:${Math.min(100, u.record.todayTotal / (todayTop[0].record.todayTotal || 1) * 100)}%"></i></div>
+                </div>
+                <b style="color:var(--primary)">${u.record.todayTotal}题</b>
+              </div>`).join('')
+            : '<div class="empty" style="padding:24px 0"><div class="big">📭</div>今天还没有人刷题</div>'}
+          </div>
+          <div>
+            <h2 style="font-size:14px;margin-bottom:10px">🏆 累计刷题 Top 8</h2>
+            ${top.length ? top.map(u => `
+              <div style="display:flex;align-items:center;gap:10px;padding:7px 0;border-bottom:1px dashed var(--border)">
+                <span class="avatar">${esc((u.nickname || u.username).slice(0, 1))}</span>
+                <div style="flex:1;min-width:0">
+                  <div style="font-size:13px;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(u.nickname || u.username)}</div>
+                  <div class="bar"><i style="width:${Math.min(100, u.record.total / (top[0].record.total || 1) * 100)}%"></i></div>
+                </div>
+                <b style="color:var(--primary)">${(u.record.total || 0).toLocaleString()}</b>
+              </div>`).join('')
+            : '<div class="empty" style="padding:24px 0"><div class="big">📭</div>暂无刷题数据</div>'}
+          </div>
+        </div>
+        <h2 style="font-size:14px;margin:18px 0 10px">💎 当前 VIP 用户（${vipUsers.length}）</h2>
+        ${vipUsers.length ? `
+        <div style="display:flex;flex-wrap:wrap;gap:8px">
+          ${vipUsers.map(u => `<span class="badge ${u.vip.level}">${esc(u.nickname || u.username)} · ${planName(u.vip.level)} · ${fmtDate(u.vip.expireAt)}到期</span>`).join('')}
+        </div>` : '<div class="note">暂无 VIP 用户</div>'}
+      </div>`;
+  }
+  function bindOverview() {
+    const g = document.getElementById('grant-btn');
+    if (g) g.addEventListener('click', doGrant);
+    const ex = document.getElementById('export-btn');
+    if (ex) ex.addEventListener('click', doExport);
+  }
+
+  function renderUsers(list) {
+    return `
+      <div class="card-head">
+        <h2>用户明细（${list.length}）</h2>
+        <div class="toolbar">
+          <select class="search" id="user-vip-filter" style="width:auto">
+            <option value="all" ${state.vipFilter === 'all' ? 'selected' : ''}>全部用户</option>
+            <option value="online" ${state.vipFilter === 'online' ? 'selected' : ''}>🟢 当前在线</option>
+            <option value="vip" ${state.vipFilter === 'vip' ? 'selected' : ''}>💎 仅 VIP 用户</option>
+            <option value="active" ${state.vipFilter === 'active' ? 'selected' : ''}>🔥 今日活跃</option>
+          </select>
+          <input class="search" id="user-search" placeholder="🔍 搜索用户名 / 昵称" value="${esc(state.q)}">
+        </div>
+      </div>
+      <div style="overflow-x:auto;margin-top:10px">
+      <table>
+        <tr>
+          <th>用户</th><th>在线状态</th><th>会员</th><th>今日刷题</th><th>累计刷题</th><th>正确率</th><th>连续打卡</th><th>注册时间</th><th>操作</th>
+        </tr>
+        ${list.length ? list.map(u => {
+          const acc = u.record.total ? Math.round(u.record.correct / u.record.total * 100) : 0;
+          const fl = u.flags || {};
+          const isOnline = u.lastSeen && (Date.now() - u.lastSeen) < 5 * 60 * 1000;
+          const onlineBadge = isOnline
+            ? '<span style="color:#16a34a;font-size:12px;white-space:nowrap">🟢 在线<br><span style="color:#94a3b8;font-size:11px">' + fmtAgo(u.lastSeen) + '</span></span>'
+            : u.lastSeen
+              ? '<span style="color:#94a3b8;font-size:11px;white-space:nowrap">⚪ ' + fmtAgo(u.lastSeen) + '<br><span style="color:#cbd5e1;font-size:10px">' + fmtDate(u.lastSeen) + '</span></span>'
+              : '<span style="color:#cbd5e1;font-size:11px">—</span>';
+          const riskBadge = fl.disabled ? '<span class="badge" style="background:var(--danger);color:#fff" title="' + esc(fl.reason || '') + '">已封禁</span>'
+            : fl.suspicious >= 10 ? '<span class="badge" style="background:var(--warning);color:#fff" title="风控分 ' + fl.suspicious + '：' + esc(fl.reason || '') + '">风控 ' + fl.suspicious + '</span>'
+            : fl.suspicious > 0 ? '<span class="badge" style="background:#FDE68A;color:#92400E" title="' + esc(fl.reason || '') + '">可疑 ' + fl.suspicious + '</span>' : '';
+          return `
+          <tr ${fl.disabled ? 'style="opacity:.62"' : ''}>
+            <td>
+              <span class="avatar">${esc((u.nickname || u.username).slice(0, 1))}</span>
+              <b>${esc(u.nickname || u.username)}</b>
+              <div style="font-size:12px;color:var(--text-3)">@${esc(u.username)} ${u.role === 'admin' ? '<span class="badge role-admin">管理员</span>' : ''} ${riskBadge}</div>
+            </td>
+            <td>${onlineBadge}</td>
+            <td>${vipBadge(u.vip.level, u.vip.expireAt)}<div class="vip-expire">${u.vip.level !== 'free' ? fmtDate(u.vip.expireAt) : ''}</div></td>
+            <td>${u.record.todayTotal > 0 ? '<b style="color:var(--success)">' + u.record.todayTotal + '</b>' : '<span style="color:var(--text-3)">-</span>'}</td>
+            <td><b>${(u.record.total || 0).toLocaleString()}</b><div class="vip-expire">对 ${u.record.correct || 0} / 错 ${u.record.wrong || 0}</div></td>
+            <td>${u.record.total ? '<b style="color:' + (acc >= 80 ? 'var(--success)' : acc >= 60 ? 'var(--warning)' : 'var(--danger)') + '">' + acc + '%</b>' : '-'}</td>
+            <td>${u.streak.count ? '🔥 ' + u.streak.count + ' 天' : '-'}</td>
+            <td style="white-space:nowrap">${fmtDate(u.createdAt)}</td>
+            <td style="white-space:nowrap">
+              <button class="btn btn-ghost" data-user="${esc(u.username)}" title="查看该用户全部数据">📋 详情</button>
+              ${fl.disabled
+                ? `<button class="btn btn-ghost" data-unban="${esc(u.username)}" title="解除封禁">🔓 解封</button>`
+                : `<button class="btn btn-ghost" data-ban="${esc(u.username)}" title="封禁该用户（开挂/篡改）">🚫 封禁</button>`}
+              ${u.banks.count ? `<span class="badge free" title="${u.banks.count} 个个人题库 · ${u.banks.totalQuestions} 题">📚 ${u.banks.count}</span>` : ''}
+            </td>
+          </tr>`;
+        }).join('') : '<tr><td colspan="8"><div class="empty"><div class="big">🔍</div>没有匹配的用户</div></td></tr>'}
+      </table>
+      </div>`;
+  }
+  function bindUsers() {
+    const s = document.getElementById('user-search');
+    if (s) s.addEventListener('input', () => { state.q = s.value; render(); });
+    const f = document.getElementById('user-vip-filter');
+    if (f) f.addEventListener('change', () => { state.vipFilter = f.value; render(); });
+    document.querySelectorAll('[data-user]').forEach(b => b.addEventListener('click', () => openUserDetail(b.dataset.user)));
+    document.querySelectorAll('[data-ban]').forEach(b => b.addEventListener('click', async () => {
+      const name = b.dataset.ban;
+      const reason = prompt('封禁账号「' + name + '」（开挂/篡改等违规行为）。\n请输入封禁原因（可选）：') ?? '';
+      if (!confirm('确定封禁账号「' + name + '」？封禁后该用户将无法登录和使用。')) return;
+      try { await api('POST', '/api/admin/ban', { username: name, disabled: true, reason }); toast('已封禁：' + name); load(); }
+      catch (e) { if (e.status === 401) logoutLocal(); else toast('操作失败：' + e.message); }
+    }));
+    document.querySelectorAll('[data-unban]').forEach(b => b.addEventListener('click', async () => {
+      const name = b.dataset.unban;
+      if (!confirm('确定解除「' + name + '」的封禁？')) return;
+      try { await api('POST', '/api/admin/ban', { username: name, disabled: false, reason: '管理员解封' }); toast('已解封：' + name); load(); }
+      catch (e) { if (e.status === 401) logoutLocal(); else toast('操作失败：' + e.message); }
+    }));
+  }
+
+  /* ---------- 用户详情弹窗 ---------- */
+  function udModal() {
+    let el = document.getElementById('user-modal');
+    if (!el) { el = document.createElement('div'); el.id = 'user-modal'; document.body.appendChild(el); }
+    return el;
+  }
+  async function openUserDetail(username) {
+    const el = udModal();
+    el.hidden = false;
+    el.innerHTML = '<div class="modal-box"><div class="modal-body" style="padding:44px;text-align:center;color:var(--text-3)">⏳ 正在加载「' + esc(username) + '」的全部数据…</div></div>';
+    el.onclick = e => { if (e.target === el) el.hidden = true; };
+    try {
+      const d = await api('GET', '/api/admin/user-detail?username=' + encodeURIComponent(username));
+      el.innerHTML = userDetailHTML(d);
+      bindUserDetail(el, d);
+    } catch (e) {
+      if (e.status === 401) { logoutLocal(); return; }
+      el.innerHTML = '<div class="modal-box"><div class="modal-body" style="padding:44px;text-align:center;color:var(--danger)">加载失败：' + esc(e.message) + '<br><button class="btn btn-ghost" id="ud-close" style="margin-top:16px">关闭</button></div></div>';
+      document.getElementById('ud-close').addEventListener('click', () => { el.hidden = true; });
+    }
+  }
+  function bindUserDetail(el, d) {
+    const c = el.querySelector('#ud-close');
+    if (c) c.addEventListener('click', () => { el.hidden = true; });
+    const banBtn = el.querySelector('#ud-ban');
+    if (banBtn) banBtn.addEventListener('click', async () => {
+      const reason = (el.querySelector('#ud-ban-reason') || {}).value || '';
+      if (!confirm('确定封禁账号「' + d.username + '」？封禁后该用户将无法登录和使用。')) return;
+      try {
+        await api('POST', '/api/admin/ban', { username: d.username, disabled: true, reason });
+        toast('已封禁：' + d.username);
+        openUserDetail(d.username); load();
+      } catch (e) { if (e.status === 401) logoutLocal(); else toast('操作失败：' + e.message); }
+    });
+    const unbanBtn = el.querySelector('#ud-unban');
+    if (unbanBtn) unbanBtn.addEventListener('click', async () => {
+      if (!confirm('确定解除「' + d.username + '」的封禁？')) return;
+      try {
+        await api('POST', '/api/admin/ban', { username: d.username, disabled: false, reason: '管理员解封' });
+        toast('已解封：' + d.username);
+        openUserDetail(d.username); load();
+      } catch (e) { if (e.status === 401) logoutLocal(); else toast('操作失败：' + e.message); }
+    });
+  }
+  function userDetailHTML(d) {
+    const acc = d.record.total ? Math.round(d.record.correct / d.record.total * 100) : 0;
+    const maxDay = Math.max(1, ...d.days.map(x => x.total));
+    const trend = d.days.map(x => `
+      <div class="trend-bar" title="${x.key}｜答 ${x.total} 题 · 对 ${x.correct} 题">
+        <i style="height:${Math.max(4, x.total / maxDay * 100)}%"></i>
+        <span>${x.total || ''}</span><em>${x.label}</em>
+      </div>`).join('');
+    const perf = d.record.byBank && d.record.byBank.length ? d.record.byBank.map(b => {
+      const pct = b.total ? Math.round(b.correct / b.total * 100) : 0;
+      return `<div class="bp-row">
+        <span class="bp-name">${b.isPersonal ? '📚' : '🏛'} ${esc(b.name)}</span>
+        <span class="bp-bar"><i style="width:${pct}%"></i></span>
+        <span class="bp-num">${b.total} 题 · ${pct}%</span>
+      </div>`;
+    }).join('') : '<div class="detail-note">暂无刷题记录</div>';
+    const pb = d.banks.data.length ? d.banks.data.map(b => `
+      <div class="pb-row">
+        <span class="pb-name">📚 ${esc(b.name || '未命名题库')}</span>
+        <span class="pb-count">${(b.questions || []).length} 题</span>
+      </div>`).join('') : '<div class="detail-note">没有个人题库</div>';
+    const orders = d.orders.length ? d.orders.map(o => `
+      <tr>
+        <td style="white-space:nowrap">${fmtTime(o.createdAt)}</td>
+        <td>${planName(o.planId)}</td>
+        <td style="font-weight:700">${o.source === 'redeem' ? '🎟 兑换码' : money(o.amount)}</td>
+        <td><span class="badge ${o.status}">${o.status === 'pending' ? '待核对' : o.status === 'confirmed' ? '已开通' : '已驳回'}</span></td>
+        <td><code>${esc(o.note || '-')}</code></td>
+      </tr>`).join('') : '<tr><td colspan="5"><div class="empty" style="padding:20px 0"><div class="big">🧾</div>暂无订单</div></td></tr>';
+    const vipLine = d.vip.level !== 'free' ? ' · ' + fmtDate(d.vip.expireAt) + ' 到期' : '';
+    return `
+      <div class="modal-box">
+        <div class="modal-head">
+          <div class="detail-avatar">${esc((d.nickname || d.username).slice(0, 1))}</div>
+          <div style="min-width:0">
+            <div style="font-size:17px;font-weight:800">${esc(d.nickname || d.username)} ${vipBadge(d.vip.level, d.vip.expireAt)}</div>
+            <div style="font-size:12px;opacity:.88;margin-top:2px">@${esc(d.username)} · 注册于 ${fmtDate(d.createdAt)}${vipLine}</div>
+          </div>
+          <button class="modal-close" id="ud-close">✕</button>
+        </div>
+        <div class="modal-body">
+          <div class="detail-sec" style="border:1.5px solid ${d.flags.disabled ? 'var(--danger)' : d.flags.suspicious > 0 ? '#FDE68A' : 'var(--border)'};background:${d.flags.disabled ? 'var(--danger-light)' : d.flags.suspicious > 0 ? '#FFFBEB' : 'var(--card)'}">
+            <h3>🚨 风控状态 <span style="font-weight:400;font-size:12px;color:var(--text-3)">异常分 ${d.flags.suspicious || 0} / 30 自动封禁</span></h3>
+            <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap">
+              ${d.flags.disabled
+                ? '<span class="badge" style="background:var(--danger);color:#fff">已封禁</span>'
+                : d.flags.suspicious >= 10
+                  ? '<span class="badge" style="background:var(--warning);color:#fff">风控中</span>'
+                  : '<span class="badge confirmed">正常</span>'}
+              <span style="font-size:12px;color:var(--text-3);flex:1;min-width:160px">${esc(d.flags.reason || '未检测到异常行为')}</span>
+              <input id="ud-ban-reason" class="search" style="width:180px" placeholder="封禁原因（可选）" maxlength="100" />
+              ${d.flags.disabled
+                ? '<button class="btn btn-ghost" id="ud-unban">🔓 解除封禁</button>'
+                : '<button class="btn" id="ud-ban" style="background:var(--danger);border-color:var(--danger);color:#fff">🚫 封禁该用户</button>'}
+            </div>
+          </div>
+          <div class="dstat">
+            <div class="dstat-item"><span>累计刷题</span><b>${(d.record.total || 0).toLocaleString()}</b></div>
+            <div class="dstat-item"><span>正确率</span><b style="color:${acc >= 80 ? 'var(--success)' : acc >= 60 ? 'var(--warning)' : 'var(--danger)'}">${acc}%</b></div>
+            <div class="dstat-item"><span>今日刷题</span><b>${d.record.todayTotal || 0}</b></div>
+            <div class="dstat-item"><span>连续打卡</span><b>${d.streak.count || 0} 天</b></div>
+            <div class="dstat-item"><span>活跃天数</span><b>${d.record.activeDays || 0} 天</b></div>
+            <div class="dstat-item"><span>错题本</span><b>${d.record.wrongCount || 0} 题</b></div>
+            <div class="dstat-item"><span>个人题库</span><b>${d.banks.count}</b></div>
+            <div class="dstat-item"><span>订单 / 已开通</span><b>${d.orders.count} / ${d.orders.confirmed}</b></div>
+          </div>
+          <div class="detail-sec">
+            <h3>📈 近 14 天刷题趋势（今日 ${d.record.todayTotal || 0} 题）</h3>
+            <div class="trend">${trend}</div>
+          </div>
+          <div class="detail-sec">
+            <h3>🎯 各题库表现</h3>
+            ${perf}
+          </div>
+          <div class="detail-sec">
+            <h3>📚 个人题库（${d.banks.count} 个 · 共 ${d.banks.totalQuestions} 题）</h3>
+            ${d.banks.count ? '<div class="pb-grid">' + pb + '</div>' : pb}
+          </div>
+          <div class="detail-sec">
+            <h3>🧾 订单记录（共 ${d.orders.count} 笔 · 累计消费 ${money(d.orders.amount)}）</h3>
+            <div style="overflow-x:auto;margin-top:8px">
+            <table>
+              <tr><th>时间</th><th>套餐</th><th>金额</th><th>状态</th><th>单号/兑换码</th></tr>
+              ${orders}
+            </table>
+            </div>
+          </div>
+        </div>
+      </div>`;
+  }
+
+  function renderOrders(list) {
+    const pending = state.orders.filter(o => o.status === 'pending');
+    const confirmed = state.orders.filter(o => o.status === 'confirmed');
+    return `
+      <div class="card-head">
+        <h2>订单</h2>
+        <div style="display:flex;gap:8px;align-items:center">
+          <button class="tab ${state.orderFilter !== 'pending' && state.orderFilter !== 'confirmed' ? 'active' : ''}" data-of="all">全部 (${state.orders.length})</button>
+          <button class="tab ${state.orderFilter === 'pending' ? 'active' : ''}" data-of="pending">待核对 (${pending.length})</button>
+          <button class="tab ${state.orderFilter === 'confirmed' ? 'active' : ''}" data-of="confirmed">已开通 (${confirmed.length})</button>
+        </div>
+      </div>
+      <div style="overflow-x:auto;margin-top:10px">
+      <table>
+        <tr><th>时间</th><th>用户</th><th>套餐</th><th>金额</th><th>来源</th><th>单号/兑换码</th><th>状态</th><th>操作</th></tr>
+        ${list.length ? list.map(o => `
+        <tr>
+          <td style="white-space:nowrap">${fmtTime(o.createdAt)}</td>
+          <td><b>${esc(o.user)}</b></td>
+          <td>${planName(o.planId)}</td>
+          <td style="font-weight:700">${o.source === 'redeem' ? '兑换码' : money(o.amount)}</td>
+          <td>${esc(o.contact || '-')}</td>
+          <td><code>${esc(o.note || '-')}</code></td>
+          <td><span class="badge ${o.status}">${o.status === 'pending' ? '待核对' : o.status === 'confirmed' ? '已开通' : '已驳回'}</span></td>
+          <td style="white-space:nowrap">
+            ${o.status === 'pending'
+              ? `<button class="btn btn-ok" data-confirm="${o.id}">✓ 确认开通</button>
+                 <button class="btn btn-no" data-reject="${o.id}">驳回</button>`
+              : `<span class="note">${o.status === 'confirmed' ? '✅ 已发放' : ''}</span>`}
+          </td>
+        </tr>`).join('') : `<tr><td colspan="8"><div class="empty"><div class="big">🎉</div><b>没有待核对的订单</b><br><span class="note">新订单会实时出现在这里</span></div></td></tr>`}
+      </table>
+      </div>`;
+  }
+  function bindOrders() {
+    app.querySelectorAll('[data-of]').forEach(b => b.addEventListener('click', () => { state.orderFilter = b.dataset.of; render(); }));
+    app.querySelectorAll('[data-confirm]').forEach(b => b.addEventListener('click', async () => {
+      const id = b.dataset.confirm;
+      if (!confirm('确认该用户已付款？确认后将立即为其开通会员。')) return;
+      try { await api('POST', '/api/admin/confirm', { id: Number(id) }); toast('已开通会员'); load(); }
+      catch (e) { if (e.status === 401) logoutLocal(); else toast('操作失败：' + e.message); }
+    }));
+    app.querySelectorAll('[data-reject]').forEach(b => b.addEventListener('click', async () => {
+      const id = b.dataset.reject;
+      if (!confirm('驳回该订单？用户将不会开通会员。')) return;
+      try { await api('POST', '/api/admin/reject', { id: Number(id) }); toast('已驳回'); load(); }
+      catch (e) { if (e.status === 401) logoutLocal(); else toast('操作失败：' + e.message); }
+    }));
+  }
+
+  function renderLogs() {
+    const ACT = {
+      admin_login: '管理员登录', admin_logout: '退出登录', admin_login_fail: '登录失败', admin_chpass: '修改口令',
+      order_confirm: '确认订单开通', order_reject: '驳回订单', grant_vip: '手动开通会员', admin_export: '导出数据',
+      user_register: '新用户注册',
+      ticket_create: '用户提交工单', ticket_reply: '客服回复工单', ticket_close: '关闭工单'
+    };
+    return `
+      <div class="card-head">
+        <h2>审计日志（最近 ${state.logs.length} 条）</h2>
+        <div class="note">记录登录、改口令、核验订单、开通会员、导出数据等关键操作</div>
+      </div>
+      <div style="overflow-x:auto;margin-top:10px">
+      <table>
+        <tr><th>时间</th><th>操作</th><th>详情</th></tr>
+        ${state.logs.length ? state.logs.map(l => `
+        <tr>
+          <td style="white-space:nowrap">${fmtTime(l.time)}</td>
+          <td><span class="log-action">${esc(ACT[l.action] || l.action)}</span></td>
+          <td>${esc(l.detail || '')}</td>
+        </tr>`).join('')
+        : '<tr><td colspan="3"><div class="empty"><div class="big">📋</div>暂无日志</div></td></tr>'}
+      </table>
+      </div>`;
+  }
+
+  function renderRedeem() {
+    const PLANS = { vip1: '黄金VIP', vip2: '铂金VIP', vip3: '至尊VIP' };
+    const used = state.redeem.filter(r => r.status === 'used').length;
+    const unused = state.redeem.filter(r => r.status === 'unused').length;
+    return `
+      <div style="padding:16px 18px">
+        <div class="card-head" style="padding:0 0 14px">
+          <h2>兑换码管理</h2>
+          <span class="note">未使用 ${unused} · 已使用 ${used} · 共 ${state.redeem.length}</span>
+        </div>
+        <div style="background:var(--primary-light);border-radius:12px;padding:14px 16px;margin-bottom:16px">
+          <div class="form-grid">
+            <select id="rd-level">
+              <option value="vip1">黄金VIP（1个月）</option>
+              <option value="vip2">铂金VIP（3个月）</option>
+              <option value="vip3">至尊VIP（12个月）</option>
+            </select>
+            <select id="rd-months">
+              <option value="1">1 个月</option>
+              <option value="3">3 个月</option>
+              <option value="6">6 个月</option>
+              <option value="12">12 个月</option>
+            </select>
+            <select id="rd-count">
+              <option value="1">生成 1 个</option>
+              <option value="5">生成 5 个</option>
+              <option value="10">生成 10 个</option>
+              <option value="20">生成 20 个</option>
+              <option value="50">生成 50 个</option>
+            </select>
+            <button class="btn btn-ok" id="rd-gen">🎟 生成兑换码</button>
+          </div>
+          <div id="rd-result" style="margin-top:12px"></div>
+          <div class="note" style="margin-top:10px">随机兑换码格式 XS-XXXX-XXXX-XXXX，仅限本后台登录生成；用户端「我的 → 兑换码兑换」输入即可开通对应会员。</div>
+        </div>
+        <div style="overflow-x:auto">
+        <table>
+          <tr><th>兑换码</th><th>套餐</th><th>状态</th><th>生成时间</th><th>使用者</th><th>使用时间</th><th>操作</th></tr>
+          ${state.redeem.length ? state.redeem.map(r => `
+          <tr>
+            <td><code style="font-weight:700">${esc(r.code)}</code></td>
+            <td>${PLANS[r.level] || esc(r.level)}${r.months && r.months !== { vip1: 1, vip2: 3, vip3: 12 }[r.level] ? ' x' + r.months + '个月' : ''}</td>
+            <td>${r.status === 'used' ? '<span class="badge confirmed">已使用</span>' : '<span class="badge pending">未使用</span>'}</td>
+            <td style="white-space:nowrap">${fmtTime(r.createdAt)}</td>
+            <td>${esc(r.usedBy || '-')}</td>
+            <td style="white-space:nowrap">${r.usedAt ? fmtTime(r.usedAt) : '-'}</td>
+            <td><button class="btn btn-ghost" data-copy="${esc(r.code)}">复制</button></td>
+          </tr>`).join('')
+          : '<tr><td colspan="7"><div class="empty"><div class="big">🎟</div>还没有兑换码，选好套餐点击「生成兑换码」</div></td></tr>'}
+        </table>
+        </div>
+      </div>`;
+  }
+  function bindRedeem() {
+    const gen = document.getElementById('rd-gen');
+    if (gen) gen.addEventListener('click', doGenerateRedeem);
+    document.querySelectorAll('[data-copy]').forEach(el => el.addEventListener('click', async () => {
+      const code = el.dataset.copy;
+      try { await navigator.clipboard.writeText(code); toast('已复制：' + code); }
+      catch (e) {
+        const ta = document.createElement('textarea');
+        ta.value = code; document.body.appendChild(ta); ta.select();
+        try { document.execCommand('copy'); toast('已复制：' + code); } catch (e2) { toast('复制失败，请手动选择'); }
+        ta.remove();
+      }
+    }));
+  }
+  async function doGenerateRedeem() {
+    const level = document.getElementById('rd-level').value;
+    const months = Number(document.getElementById('rd-months').value) || 1;
+    const count = Number(document.getElementById('rd-count').value) || 1;
+    const btn = document.getElementById('rd-gen');
+    btn.disabled = true; btn.textContent = '生成中…';
+    try {
+      const r = await api('POST', '/api/admin/redeem/generate', { level, months, count });
+      const box = document.getElementById('rd-result');
+      box.innerHTML = '<div style="font-size:13px;font-weight:600;color:var(--success);margin-bottom:8px">✅ 已生成 ' + r.count + ' 个兑换码（点击复制）</div>'
+        + r.codes.map(c => `<span data-copy="${c}" style="display:inline-block;background:#fff;border:1.5px solid var(--success);color:var(--success);font-weight:700;border-radius:8px;padding:6px 12px;margin:0 6px 6px 0;font-size:13px;cursor:pointer">${c}</span>`).join('');
+      box.querySelectorAll('[data-copy]').forEach(el => el.addEventListener('click', async () => {
+        try { await navigator.clipboard.writeText(el.dataset.copy); toast('已复制：' + el.dataset.copy); }
+        catch (e) {
+          const ta = document.createElement('textarea'); ta.value = el.dataset.copy; document.body.appendChild(ta); ta.select();
+          try { document.execCommand('copy'); toast('已复制：' + el.dataset.copy); } catch (e2) {}
+          ta.remove();
+        }
+      }));
+      toast('兑换码已生成');
+      load();
+    } catch (e) {
+      if (e.status === 401) logoutLocal();
+      else toast('生成失败：' + e.message);
+    } finally { btn.disabled = false; btn.textContent = '🎟 生成兑换码'; }
+  }
+
+  /* ---------- 客服工单工作台 ---------- */
+  function ticketBadge(st) {
+    return { open: '<span class="badge pending">待处理</span>', pending: '<span class="badge" style="background:#DBEAFE;color:#1D4ED8">处理中</span>',
+      replied: '<span class="badge confirmed">已回复</span>', closed: '<span class="badge free">已关闭</span>' }[st] || '<span class="badge free">' + esc(st) + '</span>';
+  }
+  function renderTickets() {
+    const open = state.tickets.filter(t => t.status === 'open').length;
+    const pending = state.tickets.filter(t => t.status === 'pending').length;
+    const replied = state.tickets.filter(t => t.status === 'replied').length;
+    const closed = state.tickets.filter(t => t.status === 'closed').length;
+    const list = state.ticketFilter === 'all' ? state.tickets
+      : state.ticketFilter === 'todo' ? state.tickets.filter(t => t.status !== 'closed')
+      : state.tickets.filter(t => t.status === state.ticketFilter);
+    return `
+      <div class="card-head">
+        <h2>客服工单（共 ${state.tickets.length} · 未关闭 ${state.tickets.length - closed}）</h2>
+        <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+          <button class="tab ${state.ticketFilter === 'all' ? 'active' : ''}" data-tf="all">全部 (${state.tickets.length})</button>
+          <button class="tab ${state.ticketFilter === 'todo' ? 'active' : ''}" data-tf="todo">待处理 (${open + pending + replied})</button>
+          <button class="tab ${state.ticketFilter === 'replied' ? 'active' : ''}" data-tf="replied">已回复 (${replied})</button>
+          <button class="tab ${state.ticketFilter === 'closed' ? 'active' : ''}" data-tf="closed">已关闭 (${closed})</button>
+        </div>
+      </div>
+      <div style="overflow-x:auto;margin-top:10px">
+      <table>
+        <tr><th>工单号</th><th>时间</th><th>用户</th><th>类型</th><th>问题描述</th><th>状态</th><th>操作</th></tr>
+        ${list.length ? list.map(t => `
+        <tr>
+          <td>#${t.id}</td>
+          <td style="white-space:nowrap">${fmtTime(t.createdAt)}</td>
+          <td><b>${esc(t.user)}</b></td>
+          <td><span class="badge free">${esc(t.subject || '咨询')}</span></td>
+          <td style="max-width:280px"><div style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="${esc(t.content)}">${esc(t.content)}</div></td>
+          <td>${ticketBadge(t.status)}</td>
+          <td style="white-space:nowrap">
+            <button class="btn btn-ghost" data-ticket="${t.id}">💬 处理</button>
+            ${t.status !== 'closed' ? `<button class="btn btn-no" data-tclose="${t.id}" style="margin-left:4px">关闭</button>` : ''}
+          </td>
+        </tr>`).join('')
+        : '<tr><td colspan="7"><div class="empty"><div class="big">💬</div>暂无客服工单<br><span class="note">用户端「我的 → 联系客服」提交的问题会出现在这里</span></div></td></tr>'}
+      </table>
+      </div>`;
+  }
+  function bindTickets() {
+    app.querySelectorAll('[data-tf]').forEach(b => b.addEventListener('click', () => { state.ticketFilter = b.dataset.tf; render(); }));
+    app.querySelectorAll('[data-ticket]').forEach(b => b.addEventListener('click', () => openTicket(Number(b.dataset.ticket))));
+    app.querySelectorAll('[data-tclose]').forEach(b => b.addEventListener('click', async () => {
+      const id = Number(b.dataset.tclose);
+      if (!confirm('关闭该工单？关闭后用户端将显示为已关闭。')) return;
+      try { await api('POST', '/api/admin/tickets/close', { id }); toast('工单已关闭'); load(); }
+      catch (e) { if (e.status === 401) logoutLocal(); else toast('操作失败：' + e.message); }
+    }));
+  }
+  function tkModal() {
+    let el = document.getElementById('ticket-modal');
+    if (!el) { el = document.createElement('div'); el.id = 'ticket-modal'; document.body.appendChild(el); }
+    return el;
+  }
+  /* 让弹窗可被头部拖拽移动（初始居中） */
+  function makeDraggable(box, handle) {
+    let dragging = false, startX = 0, startY = 0, initLeft = 0, initTop = 0;
+    handle.style.cursor = 'move';
+    handle.style.userSelect = 'none';
+    handle.addEventListener('mousedown', e => {
+      if (e.target.closest('.modal-close')) return;
+      dragging = true;
+      startX = e.clientX;
+      startY = e.clientY;
+      const rect = box.getBoundingClientRect();
+      initLeft = rect.left;
+      initTop = rect.top;
+      box.style.transform = 'none';
+      box.style.left = initLeft + 'px';
+      box.style.top = initTop + 'px';
+      e.preventDefault();
+    });
+    const move = e => {
+      if (!dragging) return;
+      box.style.left = (initLeft + e.clientX - startX) + 'px';
+      box.style.top = (initTop + e.clientY - startY) + 'px';
+    };
+    const up = () => { dragging = false; };
+    document.addEventListener('mousemove', move);
+    document.addEventListener('mouseup', up);
+    box._tkDragCleanup = () => {
+      document.removeEventListener('mousemove', move);
+      document.removeEventListener('mouseup', up);
+    };
+  }
+
+  function openTicket(id) {
+    const el = tkModal();
+    if (el._tkDragCleanup) { el._tkDragCleanup(); el._tkDragCleanup = null; }
+    const t = state.tickets.find(x => x.id === id);
+    if (!t) return toast('工单不存在');
+    el.hidden = false;
+    el.innerHTML = `
+      <div class="modal-box" data-tk-box style="width:640px;position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);margin:0">
+        <div class="modal-head" data-tk-head>
+          <div class="detail-avatar">💬</div>
+          <div style="min-width:0">
+            <div style="font-size:17px;font-weight:800">工单 #${t.id} · ${esc(t.subject || '咨询')} ${ticketBadge(t.status)}</div>
+            <div style="font-size:12px;opacity:.88;margin-top:2px">@${esc(t.user)} · 提交于 ${fmtTime(t.createdAt)}${t.updatedAt && t.updatedAt !== t.createdAt ? ' · 更新于 ' + fmtTime(t.updatedAt) : ''}</div>
+          </div>
+          <button class="modal-close" id="tk-close">✕</button>
+        </div>
+        <div class="modal-body">
+          <div style="background:#F8FAFC;border:1px solid var(--border);border-radius:12px;padding:14px 16px">
+            <div style="font-size:12px;color:var(--text-3);margin-bottom:6px">用户问题描述</div>
+            <div style="font-size:14px;line-height:1.8;white-space:pre-wrap">${esc(t.content)}</div>
+          </div>
+          ${t.reply ? `
+          <div style="margin-top:14px;background:var(--primary-light);border-radius:12px;padding:14px 16px">
+            <div style="font-size:12px;color:var(--text-3);margin-bottom:6px">上次回复（${fmtTime(t.replyAt)}）</div>
+            <div style="font-size:14px;line-height:1.8;white-space:pre-wrap">${esc(t.reply)}</div>
+          </div>` : ''}
+          <div class="detail-sec">
+            <h3>${t.status === 'closed' ? '🔒 工单已关闭 · 可追加回复' : '✍ 回复用户'}</h3>
+            <textarea id="tk-reply" rows="4" maxlength="2000" placeholder="输入回复内容，提交后用户端将看到「客服回复」" style="width:100%;padding:12px 14px;border:1.5px solid var(--border);border-radius:11px;outline:none;font-size:13px;line-height:1.7;resize:vertical;box-sizing:border-box"></textarea>
+          </div>
+          <div style="display:flex;gap:10px;margin-top:16px;flex-wrap:wrap">
+            <button class="btn btn-ok" id="tk-reply-btn" style="flex:1">提交回复</button>
+            ${t.status !== 'closed' ? `<button class="btn btn-no" id="tk-close-btn">直接关闭工单</button>` : ''}
+          </div>
+        </div>
+      </div>`;
+    el.onclick = e => { if (e.target === el) el.hidden = true; };
+    document.getElementById('tk-close').addEventListener('click', () => { el.hidden = true; });
+    makeDraggable(el.querySelector('[data-tk-box]'), el.querySelector('[data-tk-head]'));
+    document.getElementById('tk-reply-btn').addEventListener('click', async () => {
+      const reply = document.getElementById('tk-reply').value;
+      if (!reply.trim()) return toast('请填写回复内容');
+      const btn = document.getElementById('tk-reply-btn');
+      btn.disabled = true; btn.textContent = '提交中…';
+      try {
+        await api('POST', '/api/admin/tickets/reply', { id: t.id, reply });
+        toast('回复成功，用户端可查看');
+        el.hidden = true; load();
+      } catch (e) {
+        if (e.status === 401) logoutLocal(); else toast('操作失败：' + e.message);
+        btn.disabled = false; btn.textContent = '提交回复';
+      }
+    });
+    const closeBtn = document.getElementById('tk-close-btn');
+    if (closeBtn) closeBtn.addEventListener('click', async () => {
+      if (!confirm('关闭该工单？')) return;
+      const reply = document.getElementById('tk-reply').value;
+      try {
+        await api('POST', '/api/admin/tickets/close', { id: t.id, reply });
+        toast('工单已关闭');
+        el.hidden = true; load();
+      } catch (e) { if (e.status === 401) logoutLocal(); else toast('操作失败：' + e.message); }
+    });
+  }
+
+  function renderSecurity() {
+    return `
+      <div style="padding:18px">
+        <h2 style="font-size:15px;margin-bottom:6px">修改管理员口令</h2>
+        <p class="note" style="margin-bottom:14px">新口令至少 8 位。修改成功后所有已登录会话立即失效，需要重新登录。</p>
+        <div class="form-grid">
+          <input type="password" id="sec-old" placeholder="原口令" autocomplete="off">
+          <input type="password" id="sec-new" placeholder="新口令（至少 8 位）" autocomplete="off">
+          <input type="password" id="sec-new2" placeholder="确认新口令" autocomplete="off">
+          <button class="btn btn-ok" id="sec-save">保存新口令</button>
+        </div>
+        <div style="margin-top:20px;padding-top:16px;border-top:1px solid var(--border)">
+          <h2 style="font-size:15px;margin-bottom:6px">安全说明</h2>
+          <div class="note" style="line-height:2">
+            • 管理员口令以加盐哈希存储，不落明文；登录采用 12 小时会话，5 次失败锁定 15 分钟。<br>
+            • 所有关键操作（登录/改口令/核验/开通/导出）都会写入审计日志，可在「审计日志」面板查看。<br>
+            • 对外公开运营前，请务必修改初始口令，并建议通过环境变量 <code>XS_ADMIN_PASSWORD</code> 预设。<br>
+            • 数据传输建议在受信任的局域网内使用；如需公网访问，请配置 HTTPS 反向代理（如 Caddy/Nginx）。<br>
+            • 用户密码均为加盐哈希存储，接口不返回任何密码字段。
+          </div>
+        </div>
+      </div>`;
+  }
+  function bindSecurity() {
+    const btn = document.getElementById('sec-save');
+    if (!btn) return;
+    btn.addEventListener('click', async () => {
+      const old = document.getElementById('sec-old').value;
+      const n1 = document.getElementById('sec-new').value;
+      const n2 = document.getElementById('sec-new2').value;
+      if (!old) return toast('请输入原口令');
+      if (n1.length < 8) return toast('新口令至少 8 位');
+      if (n1 !== n2) return toast('两次输入的新口令不一致');
+      try {
+        await api('POST', '/api/admin/password', { old, next: n1 });
+        toast('口令已修改，请重新登录');
+        setTimeout(() => logoutLocal(), 800);
+      } catch (e) {
+        if (e.status === 401) logoutLocal();
+        else toast('修改失败：' + e.message);
+      }
+    });
+  }
+
+  async function doGrant() {
+    const uname = prompt('输入要开通会员的用户名：');
+    if (!uname) return;
+    const level = prompt('选择套餐：\n1 = 黄金VIP（月卡）\n2 = 铂金VIP（季卡）\n3 = 至尊VIP（年卡）', '1');
+    if (!level) return;
+    const months = prompt('开通几个月？（1~120）', level === '3' ? '12' : level === '2' ? '3' : '1');
+    if (!months) return;
+    const levelId = { '1': 'vip1', '2': 'vip2', '3': 'vip3' }[String(level).trim()];
+    if (!levelId) return toast('套餐选择无效');
+    const m = Math.max(1, Math.min(120, Number(months) || 1));
+    if (!confirm('确认给用户「' + uname + '」开通 ' + planName(levelId) + ' x' + m + '个月？')) return;
+    try {
+      await api('POST', '/api/admin/grant', { username: uname.trim(), level: levelId, months: m });
+      toast('已开通：' + uname);
+      load();
+    } catch (e) {
+      if (e.status === 401) logoutLocal();
+      else toast('开通失败：' + e.message);
+    }
+  }
+
+  async function doExport() {
+    if (state.exporting) return;
+    state.exporting = true;
+    try {
+      const data = await api('GET', '/api/admin/export');
+      const dl = (name, content) => {
+        const blob = new Blob([content], { type: 'text/csv;charset=utf-8' });
+        const a = document.createElement('a');
+        a.href = URL.createObjectURL(blob);
+        a.download = name;
+        document.body.appendChild(a);
+        a.click();
+        setTimeout(() => { URL.revokeObjectURL(a.href); a.remove(); }, 300);
+      };
+      dl('学升_用户_' + fmtDate(Date.now()).replace(/-/g, '') + '.csv', data.usersCsv);
+      dl('学升_订单_' + fmtDate(Date.now()).replace(/-/g, '') + '.csv', data.ordersCsv);
+      toast('已导出用户与订单 CSV');
+    } catch (e) {
+      if (e.status === 401) logoutLocal();
+      else toast('导出失败：' + e.message);
+    } finally { state.exporting = false; }
+  }
+
+  if (token) load(); else renderLogin();
+  setInterval(() => { if (token && !state.paused) load(); }, 15000);
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,19 @@
+{
+  "name": "xuesheng-android",
+  "version": "1.0.0",
+  "private": true,
+  "description": "学升·安卓端（Capacitor 壳，前端复用 study-platform 网页版）",
+  "scripts": {
+    "sync:www": "node sync-www.mjs",
+    "sync": "npm run sync:www && npx cap sync android",
+    "open": "npm run sync && npx cap open android",
+    "build:apk": "npm run sync && cd android && gradlew.bat assembleDebug"
+  },
+  "dependencies": {
+    "@capacitor/android": "^6.2.0",
+    "@capacitor/core": "^6.2.0"
+  },
+  "devDependencies": {
+    "@capacitor/cli": "^6.2.0"
+  }
+}

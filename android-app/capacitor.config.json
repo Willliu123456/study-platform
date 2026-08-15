@@ -1,0 +1,11 @@
+{
+  "appId": "com.xuesheng.app",
+  "appName": "学升",
+  "webDir": "www",
+  "server": {
+    "androidScheme": "https"
+  },
+  "android": {
+    "allowMixedContent": false
+  }
+}

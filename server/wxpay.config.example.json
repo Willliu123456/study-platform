@@ -1,0 +1,11 @@
+{
+  "enabled": false,
+  "mchid": "1600000000",
+  "appid": "wx0000000000000000",
+  "apiv3Key": "请填写32位APIv3密钥",
+  "certSerial": "证书序列号（商户平台·API安全·API证书）",
+  "keyPath": "apiclient_key.pem",
+  "certPath": "apiclient_cert.pem",
+  "platformPubPath": "wechatpay_pub.pem",
+  "notifyUrl": "https://你的域名/api/wxpay/notify"
+}

@@ -1,0 +1,25 @@
+# Render 部署配置（push 到 GitHub 后自动部署）
+# 文档：https://render.com/docs/blueprint-spec
+services:
+  - type: web
+    name: xuesheng
+    runtime: node
+    plan: free                    # 免费层（0 元）
+    region: singapore             # 新加坡节点（离中国近）
+    buildCommand: npm install --omit=dev
+    startCommand: node server/server.js
+    envVars:
+      - key: PORT
+        value: 8790
+      - key: XS_DATA_DIR
+        value: /var/data/xuesheng
+      - key: NODE_ENV
+        value: production
+      # 管理员口令（首次启动会自动生成，也可预设）
+      # - key: XS_ADMIN_PASSWORD
+      #   value: 你的管理员密码
+    # 持久磁盘（SQLite 数据库存放，免费层 1GB）
+    disk:
+      name: data
+      mountPath: /var/data/xuesheng
+      sizeGB: 1

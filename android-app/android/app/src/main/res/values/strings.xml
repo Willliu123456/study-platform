@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">学升</string>
+    <string name="title_activity_main">学升</string>
+    <string name="package_name">com.xuesheng.app</string>
+    <string name="custom_url_scheme">com.xuesheng.app</string>
+</resources>

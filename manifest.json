@@ -1,0 +1,17 @@
+{
+  "name": "学升·智能刷题平台",
+  "short_name": "学升",
+  "description": "考研·考公·期末刷题学习平台：海量题库、专项训练、模拟考试、错题本、学习统计与 VIP 会员。",
+  "lang": "zh-CN",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "any",
+  "background_color": "#4F46E5",
+  "theme_color": "#4F46E5",
+  "icons": [
+    { "src": "assets/icon-192.png", "sizes": "192x192", "type": "image/png" },
+    { "src": "assets/icon-512.png", "sizes": "512x512", "type": "image/png" },
+    { "src": "assets/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ]
+}
