@@ -10,7 +10,12 @@ _pack_*.log
 data
 deploy
 scripts
-*.md
 .pentest_*
 test
 __tests__
+# 注意：不排除 README.md（HF Spaces 需要它来识别 Space 配置）
+# 但其他 .md 文件可以排除
+PENTEST_REPORT_*.md
+SECURITY_*.md
+RENDER_DEPLOY.md
+HF_DEPLOY.md
