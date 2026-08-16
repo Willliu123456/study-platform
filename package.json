@@ -6,7 +6,9 @@
   "main": "electron-main.js",
   "private": true,
   "scripts": {
-    "start": "electron .",
+    "start": "node start.js",
+    "start:server": "XS_SERVER_MODE=1 node server/server.js",
+    "start:desktop": "npx electron .",
     "pack": "electron-packager . \"学升\" --platform=win32 --arch=x64 --out=release --overwrite --prune=true --icon=assets/app.ico --ignore=\"^/release($|/)\" --ignore=\"^/server\\.log\" --ignore=\"^/_test_start\\.js\" --ignore=\"^/_probe\\.js\"",
     "make-ico": "node scripts/make-ico.js"
   },
